@@ -1,6 +1,7 @@
-SURF-LDA
+# SURF-LDA
 
-Quick-start guide:
+
+## Quick-start guide:
 
 - Install the packages (using virtual environment is recommended):
 pip install -r requirements.txt
