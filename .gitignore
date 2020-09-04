@@ -1,0 +1,9 @@
+venv
+turn-in
+docs_entropy_less_than_0.2
+stanford-ner-4.0.0
+data
+output
+evaluations
+cleaned_data
+.DS_Store
