@@ -3,7 +3,7 @@ Examining Public & Policy Responses to the Fossil Fuels Shipping Industry by top
 
 ## Quick-start guide:
 
-- Install the packages (using virtual environment is recommended):
+- Install the packages:
 
 ```
 $ pip install -r requirements.txt
