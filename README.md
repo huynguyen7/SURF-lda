@@ -1,5 +1,5 @@
 # SURF-LDA
-Examining Public & Policy Responses to the Fossil Fuels Shipping Industry by topic modeling with Python.
+Examining Public & Policy Responses to the Fossil Fuels Shipping Industry by topic modeling.
 
 ## Quick-start guide:
 
