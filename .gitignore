@@ -1,4 +1,6 @@
 venv
+.idea
+__pycache__
 turn-in
 docs_entropy_less_than_0.2
 stanford-ner-4.0.0
