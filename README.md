@@ -9,7 +9,9 @@ Examining Public & Policy Responses to the Fossil Fuels Shipping Industry by top
 $ pip install -r requirements.txt
 ```
 
+- Download Python wrapper for LDA from Mallet: [Click here] (http://mallet.cs.umass.edu/download.php)
+
 - Download Stanford-NER package: [Click here](https://nlp.stanford.edu/software/CRF-NER.shtml#Download)
 
-- Open .env file (at root folder), configure two variables 'STANFORD_MODEL' and 'STANFORD_NER_JAR' appropriately.
+- Open .env file and configure path variables for Mallet and Stanford-NER packages.
 

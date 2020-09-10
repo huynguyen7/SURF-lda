@@ -107,9 +107,9 @@ def LDA(paths, output_path, num_topics, iterations, chunksize, passes, minimum_p
     return lda_model
 
 
-def LDA_with_mallet(paths, output_path, num_topics, iterations):
+def LDA_with_mallet(paths, output_path, num_topics, iterations, minimum_probability):
     print('\nStart to LDA with: %d topics and %d iterations' % (num_topics, iterations))
-    lda_model = get_LDA_mallet_model(paths, num_topics=num_topics, iterations=iterations)
+    lda_model = get_LDA_mallet_model(paths, num_topics=num_topics, iterations=iterations, minimum_probability=minimum_probability)
     with open(paths[1], 'rb') as f:
         corpus = pickle.load(f)
 
@@ -220,10 +220,11 @@ clean_data_third_phase(get_paths_third_phase('all'), bigram_threshold=50, no_bel
 
 # LDA(get_paths_without_reset('test'), './output/final_results/get_LDA_model_multi_corestest/', 5, 20)
 
+minimum_probability = 0
 iterations = 200
-LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=10, iterations=iterations)
-LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=15, iterations=iterations)
-LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=20, iterations=iterations)
-LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=25, iterations=iterations)
-LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=30, iterations=iterations)
+LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=10, iterations=iterations, minimum_probability=minimum_probability)
+LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=15, iterations=iterations, minimum_probability=minimum_probability)
+LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=20, iterations=iterations, minimum_probability=minimum_probability)
+LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=25, iterations=iterations, minimum_probability=minimum_probability)
+LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=30, iterations=iterations, minimum_probability=minimum_probability)
 alarm(repeat=5)
