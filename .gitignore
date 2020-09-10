@@ -1,4 +1,7 @@
 venv
+cal_mean_stdDeviation.txt
+.shorttext
+.python-version
 .idea
 __pycache__
 turn-in
