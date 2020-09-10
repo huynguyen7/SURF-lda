@@ -54,6 +54,11 @@ def save_lda_model(paths, lda_model, num_topics, passes, alpha=None, beta=None):
     lda_model.save(lda_model_path)
 
 
+def save_lda_mallet_model(paths, lda_model, num_topics, iterations):
+    lda_model_path = f'{paths[16]}{num_topics}-{iterations}.gensim'
+    lda_model.save(lda_model_path)
+
+
 def add_bigrams_to_docs(data, min_count):
     docs = transform_to_list(data)
     removed_word_list = get_retained_words_list()
@@ -84,7 +89,7 @@ def save_as_pickle_for_lda(docs, paths, no_below, no_above):
     pickle.dump(corpus, open(paths[1], "wb"))  # save as corpus
 
 
-def get_LDA_mallet_model(paths, num_topics, passes):
+def get_LDA_mallet_model(paths, num_topics, iterations):
     with open(paths[1], 'rb') as f:
         corpus = pickle.load(f)  # sparse terms (sparse matrix form of corpus)
 
@@ -92,13 +97,15 @@ def get_LDA_mallet_model(paths, num_topics, passes):
     temp = dictionary[0]  # This is only to "load" the dictionary.
     id2word = dictionary.id2token
 
+
     path_to_mallet = '~/mallet-2.0.8/'
     os.environ.update({'MALLET_HOME': path_to_mallet})
     path_to_mallet_bin = '~/mallet-2.0.8/bin/mallet'
 
     model = LdaMallet(
         mallet_path=path_to_mallet_bin, corpus=corpus, num_topics=num_topics,
-        id2word=id2word, workers=2, iterations=passes, topic_threshold=0
+        prefix=f'{paths[16]}{num_topics}',
+        id2word=id2word, workers=3, iterations=iterations  #, topic_threshold=0
     )
 
     return model

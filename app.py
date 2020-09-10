@@ -8,7 +8,8 @@ from gensim.corpora import Dictionary
 from nltk.corpus import stopwords
 from cleaning_utils import first_round, get_stop_words, second_round
 from main_utils import get_corpus_data_frame, add_bigrams_to_docs, save_as_pickle_for_lda, \
-    get_LDA_model, save_lda_model, get_combined_data, get_LDA_mallet_model, alarm, get_iteration_list
+    get_LDA_model, save_lda_model, get_combined_data, get_LDA_mallet_model, alarm, get_iteration_list, \
+    save_lda_mallet_model
 from paths import *
 from sklearn.feature_extraction.text import CountVectorizer
 from visualizing_utils import show_bigrams_freq, get_words_bigrams_frequency, get_words_frequency, \
@@ -107,8 +108,8 @@ def LDA(paths, output_path, num_topics, iterations, chunksize, passes, minimum_p
 
 
 def LDA_with_mallet(paths, output_path, num_topics, iterations):
-    print('\nStart to LDA with: %d topics and %d passes' % (num_topics, iterations))
-    lda_model = get_LDA_mallet_model(paths, num_topics, iterations)
+    print('\nStart to LDA with: %d topics and %d iterations' % (num_topics, iterations))
+    lda_model = get_LDA_mallet_model(paths, num_topics=num_topics, iterations=iterations)
     with open(paths[1], 'rb') as f:
         corpus = pickle.load(f)
 
@@ -122,7 +123,7 @@ def LDA_with_mallet(paths, output_path, num_topics, iterations):
     print_topics_to_text_file(lda_model, text_file_path, num_words)
 
     # save lda model
-    save_lda_model(paths, lda_model, num_topics, iterations)
+    save_lda_mallet_model(paths, lda_model, num_topics, iterations)
 
     # visualize to html file
     visualize_LDA_mallet(paths, num_topics, iterations)
@@ -178,7 +179,7 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 """ Clean data and save as pkl files """
 # clean_data_first_phase(get_paths_first_phase('all'))
 # clean_data_second_phase(get_paths_second_phase('all'))
-clean_data_third_phase(get_paths_third_phase('all'), bigram_threshold=100, no_below=20, no_above=0.5)
+clean_data_third_phase(get_paths_third_phase('all'), bigram_threshold=50, no_below=20, no_above=0.5)
 
 # clean_data_first_phase(get_paths_first_phase('test'))
 # clean_data_second_phase(get_paths_second_phase('test'))
@@ -210,18 +211,19 @@ clean_data_third_phase(get_paths_third_phase('all'), bigram_threshold=100, no_be
 
 """ Topic modeling with LDA """
 # iterations = 100
-# LDA(get_paths_without_reset('all'), './output/final_results/all/', num_topics=10, iterations=100, chunksize=5932, passes=30, minimum_probability=0.2)
-# LDA(get_paths_without_reset('all'), './output/final_results/all/', num_topics=15, iterations=100, chunksize=5932, passes=30, minimum_probability=0.2)
-# LDA(get_paths_without_reset('all'), './output/final_results/all/', num_topics=20, iterations=100, chunksize=5932, passes=30, minimum_probability=0.2)
-# LDA(get_paths_without_reset('all'), './output/final_results/all/', num_topics=25, iterations=100, chunksize=5932, passes=30, minimum_probability=0.2)
-# LDA(get_paths_without_reset('all'), './output/final_results/all/', num_topics=30, iterations=100, chunksize=5932, passes=30, minimum_probability=0.2)
+# LDA(get_paths_without_reset('all'), './output/final_results/all/', num_topics=10, iterations=iterations, chunksize=1592, passes=30, minimum_probability=0.2)
+# LDA(get_paths_without_reset('all'), './output/final_results/all/', num_topics=15, iterations=iterations, chunksize=1592, passes=30, minimum_probability=0.2)
+#LDA(get_paths_without_reset('all'), './output/final_results/all/', num_topics=20, iterations=iterations, chunksize=1592, passes=30, minimum_probability=0.2)
+# LDA(get_paths_without_reset('all'), './output/final_results/all/', num_topics=25, iterations=iterations, chunksize=1592, passes=30, minimum_probability=0.2)
+# LDA(get_paths_without_reset('all'), './output/final_results/all/', num_topics=30, iterations=iterations, chunksize=1592, passes=30, minimum_probability=0.2)
 # alarm(repeat=5)
-
 
 # LDA(get_paths_without_reset('test'), './output/final_results/get_LDA_model_multi_corestest/', 5, 20)
 
-# LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=10, passes=num_passes)
-# LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=15, passes=num_passes)
-# LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=20, passes=num_passes)
-# LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=25, passes=num_passes)
-# LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=30, passes=num_passes)
+iterations = 200
+LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=10, iterations=iterations)
+LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=15, iterations=iterations)
+LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=20, iterations=iterations)
+LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=25, iterations=iterations)
+LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=30, iterations=iterations)
+alarm(repeat=5)
