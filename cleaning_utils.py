@@ -101,25 +101,31 @@ def text_list_tokenizer(ls):
 def get_stop_words():  # Round 2 cleaning
     stop_words = stopwords.words('english')
     stop_words.extend([  # List of words to remove
-        'im', 'just', 'dont', 'thats', 'youre', 'gonna', 'said', 'yeah',
-        'hes', 'shes', 'theyre', 'its', 'theyll', 'bc',
-        'youll', 'youd', 'isnt', 'theres', 'heres',
-        'would', 'hi', 'hello'
-        'from', 'subject', 're', 'edu',
-        'From', 'Subject', 'Re' 'zip',
-        'zip code', 'Zip Code', 'Tel', 'tel', 'ad', 'PDF',
-        'sincerely', 'Sincerely', 'SINCERELY',
-        'adhd', 'many', 'much', 'lot', 'more',
-        'dear', 'thank', 'the',
-        'already', 'without',
-        'needs', 'need', 'get', 'gets', 'like', 'likes',
+        'im', 'just', 'dont', 'thats', 'youre', 'yeah',
+        'hes', 'shes', 'theyre', 'its', 'theyll', 'bc', 'the',
+        'youll', 'youd', 'isnt', 'theres', 'heres', 'would', 've',
+        're', 'll'
 
         # Added list
-        'go', 'goes', 'comment', 'comments'
+        # 'go', 'goes', 'comment', 'comments'
         # 'project', 'projects', 'millennium', 'millenniums', 'millenium',
         # 'bulk', 'longviews', 'longview', 'washington', 'coal'
         # 'terminal', 'terminals', 'port', 'ports', 'cowlitz',
         # 'state', 'states', 'county', 'counties'
+
+        # Old list
+        # 'im', 'just', 'dont', 'thats', 'youre', 'yeah',
+        # 'hes', 'shes', 'theyre', 'its', 'theyll', 'bc', 'the',
+        # 'youll', 'youd', 'isnt', 'theres', 'heres',
+        # 'would',
+        # 'from', 'subject', 're', 'edu',
+        # 'From', 'Subject', 'Re' 'zip',
+        # 'zip code', 'Zip Code', 'Tel', 'tel', 'ad', 'PDF',
+        # 'sincerely', 'Sincerely', 'SINCERELY',
+        # 'adhd', 'many', 'much', 'lot', 'more',
+        # 'dear', 'thank',
+        # 'already', 'without',
+        # 'needs', 'need', 'get', 'gets', 'like', 'likes',
     ])
     stop_words = list(map(str.lower, stop_words))
     result = [i for n, i in enumerate(stop_words) if i not in stop_words[:n]]  # Remove duplicates
@@ -132,6 +138,8 @@ def first_round_cleaning(text, stop_words):
 
     text = re.sub('[\S]+\.(net|com|org|info|edu|gov|uk|de|ca|jp|fr|au|us|ru|ch|it|nel|se|no|es|mil)[\S]*\s?', '',
                   text)  # remove URLs
+    text = text.replace('\'', ' ')
+    text = text.replace('\\', ' ')  # remove backslash
     text = re.sub('\[.*?\]', '', text)  # remove any brackets, parentheses... and anything inside
     text = re.sub('\w\d\w*', '', text)  # remove any word that contains digit
     text = re.sub('\S*@\S*\s?', '', text)  # remove emails

@@ -7,7 +7,10 @@ import math
 import pandas
 import pickle
 import warnings
-from main_utils import alarm, append_row_to_text_file
+
+from gensim.models.wrappers import LdaMallet
+
+from main_utils import alarm, append_row_to_text_file, get_combined_data
 from gensim import models
 from gensim.corpora import Dictionary
 from nltk.corpus import stopwords
@@ -24,8 +27,8 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 """ Only to to load models path """
 corpus_path = './output/corpus/all-corpus.pkl'
 dataset_csv_path = './turn-in/dataset/dataset.csv'
-bigram_threshold = 100  # CHANGE THIS VALUE
-iteration = 100  # CHANGE THIS VALUE
+bigram_threshold = 25  # CHANGE THIS VALUE
+iteration = 200  # CHANGE THIS VALUE
 num_topics = [10, 15, 20, 25, 30]  # CHANGE THIS VALUE
 models_path = list()
 for num_topic in num_topics:
@@ -43,7 +46,9 @@ def coherence_scores_to_csv(models_path, num_topics):
     create_file(output_path)
 
     while index < len(models_path):
-        lda_model = LdaModel.load(models_path[i])
+        lda_model = LdaModel.load(models_path[index])
+        if type(lda_model) is LdaMallet:
+            lda_model = models.wrappers.ldamallet.malletmodel2ldamodel(lda_model, iterations=iteration)
         top_topics = lda_model.top_topics(corpus)
         avg_topic_coherence = sum([topic[1] for topic in top_topics]) \
                               / num_topics[index]
@@ -54,7 +59,7 @@ def coherence_scores_to_csv(models_path, num_topics):
     df.to_csv(output_path, index=False)
 
 
-# coherence_scores_to_csv(models_path=models_path, num_topics=num_topics)
+coherence_scores_to_csv(models_path=models_path, num_topics=num_topics)
 
 
 """ Calculate entropy for lda model """
@@ -100,30 +105,28 @@ def calculate_entropy_mallet_models():  # output to csv files.
     num_topic = 10
     dataset = pandas.read_csv(dataset_csv_path)
     for model_path in models_path:
-        lda_model = LdaModel.load(model_path)
-
-        # Remove this line if not using mallet model
-        # mallet_lda_model = models.wrappers.ldamallet.malletmodel2ldamodel(lda_model)
+        lda_model = LdaMallet.load(model_path)
+        lda_model = models.wrappers.ldamallet.malletmodel2ldamodel(lda_model, iterations=iteration)
 
         df = pd.DataFrame()
-        pbar = tqdm.tqdm(total=len(list(lda_model.load_document_topics())))
-        i = 0
-        for row in list(lda_model.load_document_topics()):
+        pbar = tqdm.tqdm(total=len(lda_model[corpus]))
+
+        for i, row in enumerate(lda_model[corpus]):
+            topic_dist = sorted(row, key=lambda x: (x[1]), reverse=True)
             rs_string = ''
             topic_entropy = 0
-            for topic in row:
+            for topic in topic_dist:
                 rs_string = rs_string + 'Topic ' + str(topic[0] + 1) + ': ' + str(topic[1]) + '; '
                 topic_entropy = topic_entropy + (-math.log2(topic[1]))
             df = df.append(pd.Series(
                 [str(i), dataset['Submission_Num'][i], rs_string, str(topic_entropy), dataset['Submission_Text'][i]]),
                 ignore_index=True)
             pbar.update(1)
-            i = i + 1
         df.columns = ['Document_No', 'Submission_Num', 'Probabilities', 'Entropy',
-                      'Submission_Text']  # , 'Topic_Keywords']
+                      'Submission_Text']
 
         csv_file_result_path = f'./turn-in/{bigram_threshold}/model_entropy/{num_topic}.csv'
-        num_topic = num_topic + 5  # Do nothing, just to output to filename
+        num_topic = num_topic + 5
         create_file(csv_file_result_path)
         df.to_csv(csv_file_result_path, index=False)
         pbar.close()
@@ -141,6 +144,7 @@ def show_docs_has_entropy_threshold(threshold, num_topics):
     j = 0
     while j < len(num_topics):
         csv_paths.append(folder_path + str(num_topics[j]) + '.csv')
+        j = j + 1
 
     index = 0
     pbar = tqdm.tqdm(total=len(csv_paths))
@@ -162,7 +166,8 @@ def show_docs_has_entropy_threshold(threshold, num_topics):
                 ignore_index=True)
         else:
             output_df.columns = ['Document_No', 'Submission_Num', 'Probabilities', 'Entropy', 'Submission_Text']
-        output_df.to_csv(output_path, index=False)
+        output_df.to_csv(output_path, index=False, header=False)
+        index = index + 1
         pbar.update(1)
     pbar.close()
     alarm(repeat=2)
@@ -275,14 +280,14 @@ def calculate_mean_std_deviation2(raw_dataset_csv_path, corpus_path, dictionary_
     append_row_to_text_file(string=rs_text, path=output_path)  # Output to txt file
 
 
-calculate_mean_std_deviation2(raw_dataset_csv_path='./turn-in/dataset/dataset.csv',
-                corpus_path='./output/corpus/all-corpus.pkl',
-                dictionary_path='./output/dictionary/all.gensim',
-                output_path='./cal_mean_stdDeviation.txt')
+# calculate_mean_std_deviation2(raw_dataset_csv_path='./turn-in/dataset/dataset.csv',
+#                 corpus_path='./output/corpus/all-corpus.pkl',
+#                 dictionary_path='./output/dictionary/all.gensim',
+#                 output_path='./cal_mean_stdDeviation.txt')
 
 
 """ Get Dataset (After remove dups and empty comments) """
-# raw_dataset_path = '/Users/nguyenhuy/workspace/surf-workspace/nlp/data/all-comments.csv'
+# raw_dataset_path = './data/all-comments.csv'
 # df = pandas.read_csv(raw_dataset_path, encoding="ISO-8859-1", header=0)
 #
 # pandas.set_option('max_colwidth', 1000)
@@ -302,3 +307,4 @@ calculate_mean_std_deviation2(raw_dataset_csv_path='./turn-in/dataset/dataset.cs
 #
 # csv_file_result_path = './dataset.csv'
 # create_file(csv_file_result_path)
+# data_df.to_csv(csv_file_result_path)
