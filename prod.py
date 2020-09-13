@@ -95,7 +95,7 @@ def calculate_entropy(bigram_threshold):  # output to csv files.
         pbar.close()
 
 
-# calculate_entropy(bigram_threshold=bigram_threshold)
+calculate_entropy(bigram_threshold=bigram_threshold)
 
 
 def calculate_entropy_mallet_models():  # output to csv files.
@@ -173,7 +173,7 @@ def show_docs_has_entropy_threshold(threshold, num_topics):
     alarm(repeat=2)
 
 
-# show_docs_has_entropy_threshold(threshold=0.2, num_topics=num_topics)
+show_docs_has_entropy_threshold(threshold=0.2, num_topics=num_topics)
 
 
 """ Generate html files """

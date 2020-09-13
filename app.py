@@ -210,21 +210,21 @@ clean_data_third_phase(get_paths_third_phase('all'), bigram_threshold=50, no_bel
 
 
 """ Topic modeling with LDA """
-# iterations = 100
-# LDA(get_paths_without_reset('all'), './output/final_results/all/', num_topics=10, iterations=iterations, chunksize=1592, passes=30, minimum_probability=0.2)
-# LDA(get_paths_without_reset('all'), './output/final_results/all/', num_topics=15, iterations=iterations, chunksize=1592, passes=30, minimum_probability=0.2)
-#LDA(get_paths_without_reset('all'), './output/final_results/all/', num_topics=20, iterations=iterations, chunksize=1592, passes=30, minimum_probability=0.2)
-# LDA(get_paths_without_reset('all'), './output/final_results/all/', num_topics=25, iterations=iterations, chunksize=1592, passes=30, minimum_probability=0.2)
-# LDA(get_paths_without_reset('all'), './output/final_results/all/', num_topics=30, iterations=iterations, chunksize=1592, passes=30, minimum_probability=0.2)
-# alarm(repeat=5)
+iterations = 200
+LDA(get_paths_without_reset('all'), './output/final_results/all/', num_topics=10, iterations=iterations, chunksize=1592, passes=50, minimum_probability=0.2)
+LDA(get_paths_without_reset('all'), './output/final_results/all/', num_topics=15, iterations=iterations, chunksize=1592, passes=50, minimum_probability=0.2)
+LDA(get_paths_without_reset('all'), './output/final_results/all/', num_topics=20, iterations=iterations, chunksize=1592, passes=50, minimum_probability=0.2)
+LDA(get_paths_without_reset('all'), './output/final_results/all/', num_topics=25, iterations=iterations, chunksize=1592, passes=50, minimum_probability=0.2)
+LDA(get_paths_without_reset('all'), './output/final_results/all/', num_topics=30, iterations=iterations, chunksize=1592, passes=50, minimum_probability=0.2)
+alarm(repeat=5)
 
 # LDA(get_paths_without_reset('test'), './output/final_results/get_LDA_model_multi_corestest/', 5, 20)
 
-minimum_probability = 0
-iterations = 200
-LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=10, iterations=iterations, minimum_probability=minimum_probability)
-LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=15, iterations=iterations, minimum_probability=minimum_probability)
-LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=20, iterations=iterations, minimum_probability=minimum_probability)
-LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=25, iterations=iterations, minimum_probability=minimum_probability)
-LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=30, iterations=iterations, minimum_probability=minimum_probability)
-alarm(repeat=5)
+# minimum_probability = 0.2
+# iterations = 200
+# LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=10, iterations=iterations, minimum_probability=minimum_probability)
+# LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=15, iterations=iterations, minimum_probability=minimum_probability)
+# LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=20, iterations=iterations, minimum_probability=minimum_probability)
+# LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=25, iterations=iterations, minimum_probability=minimum_probability)
+# LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=30, iterations=iterations, minimum_probability=minimum_probability)
+# alarm(repeat=5)

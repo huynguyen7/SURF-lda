@@ -1,0 +1,33 @@
+#!/bin/bash
+
+mkdir data
+mkdir -p cleaned_data/first_round/all
+mkdir -p cleaned_data/first_round/test
+mkdir -p cleaned_data/second_round/all
+mkdir -p cleaned_data/second_round/test
+
+mkdir -p evaluations/coherence_scores_graphs/all
+mkdir -p evaluations/coherence_scores_graphs/test
+mkdir -p evaluations/csv_coherence_scores/all
+mkdir -p evaluations/csv_coherence_scores/test
+mkdir -p evaluations/graph_scores
+
+mkdir -p output/bigrams
+mkdir -p output/corpus
+mkdir -p output/dictionary
+mkdir -p output/doc_topics_probs/all
+mkdir -p output/doc_topics_probs/test
+mkdir -p output/eda/first_round/top_10_words
+mkdir -p output/eda/first_round/word_freq
+mkdir -p output/eda/second_round/top_10_words
+mkdir -p output/eda/second_round/word_freq
+mkdir -p output/eda/third_round/word_freq
+mkdir -p output/final_results/all
+mkdir -p output/final_results/test
+mkdir -p output/lda_models/all
+mkdir -p output/lda_models/test
+mkdir -p output/lda_visualization/all
+mkdir -p output/lda_visualization/test
+mkdir -p output/stop_words
+
+mkdir -p turn-in
