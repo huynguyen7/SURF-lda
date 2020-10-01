@@ -73,7 +73,8 @@ def visualize_LDA_mallet(paths, num_topics, passes, alpha=None, beta=None):
         html_path = paths[15] + str(num_topics) + '-' + str(passes) + '.html'
 
     mallet_model = models.ldamodel.LdaModel.load(model_path)
-    mallet_lda_model = models.wrappers.ldamallet.malletmodel2ldamodel(mallet_model)
+    mallet_lda_model = models.wrappers.ldamallet.malletmodel2ldamodel(mallet_model, iterations=passes)
+
     lda_display = pyLDAvis.gensim.prepare(
         mallet_lda_model, corpus,
         dictionary, sort_topics=False, mds='mmds'

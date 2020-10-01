@@ -109,7 +109,7 @@ def get_LDA_mallet_model(paths, num_topics, iterations, minimum_probability):
     model = LdaMallet(
         mallet_path=os.getenv('MALLET_BIN'), corpus=corpus, num_topics=num_topics,
         prefix=f'{paths[16]}{num_topics}',
-        id2word=id2word, workers=3, iterations=iterations, topic_threshold=minimum_probability
+        id2word=id2word, workers=3, iterations=iterations, # topic_threshold=minimum_probability
     )
 
     return model

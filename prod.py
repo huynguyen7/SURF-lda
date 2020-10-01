@@ -18,7 +18,6 @@ from sklearn.feature_extraction.text import CountVectorizer
 from pandas import read_csv
 from pyLDAvis import gensim
 from gensim.models import LdaModel
-from gensim.models import CoherenceModel
 from paths import create_file
 
 
@@ -27,9 +26,9 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 """ Only to to load models path """
 corpus_path = './output/corpus/all-corpus.pkl'
 dataset_csv_path = './turn-in/dataset/dataset.csv'
-bigram_threshold = 25  # CHANGE THIS VALUE
+bigram_threshold = 100  # CHANGE THIS VALUE
 iteration = 200  # CHANGE THIS VALUE
-num_topics = [10, 15, 20, 25, 30]  # CHANGE THIS VALUE
+num_topics = [20, 25, 30]  # CHANGE THIS VALUE
 models_path = list()
 for num_topic in num_topics:
     models_path.append(f'./turn-in/{bigram_threshold}/lda_models/{num_topic}-{iteration}.gensim')
@@ -67,7 +66,7 @@ def calculate_entropy(bigram_threshold):  # output to csv files.
     with open(corpus_path, 'rb') as f:
         corpus = pickle.load(f)
 
-    num_topic = 10
+    index = 0
     dataset = pandas.read_csv(dataset_csv_path)
     for model_path in models_path:
         lda_model = LdaModel.load(model_path)
@@ -88,21 +87,21 @@ def calculate_entropy(bigram_threshold):  # output to csv files.
         df.columns = ['Document_No', 'Submission_Num', 'Probabilities', 'Entropy',
                       'Submission_Text']
 
-        csv_file_result_path = f'./turn-in/{bigram_threshold}/model_entropy/{num_topic}.csv'
-        num_topic = num_topic + 5
+        csv_file_result_path = f'./turn-in/{bigram_threshold}/model_entropy/{num_topics[index]}.csv'
+        index = index + 1
         create_file(csv_file_result_path)
         df.to_csv(csv_file_result_path, index=False)
         pbar.close()
 
 
-calculate_entropy(bigram_threshold=bigram_threshold)
+# calculate_entropy(bigram_threshold=bigram_threshold)
 
 
 def calculate_entropy_mallet_models():  # output to csv files.
     with open(corpus_path, 'rb') as f:
         corpus = pickle.load(f)
 
-    num_topic = 10
+    index = 0
     dataset = pandas.read_csv(dataset_csv_path)
     for model_path in models_path:
         lda_model = LdaMallet.load(model_path)
@@ -125,14 +124,14 @@ def calculate_entropy_mallet_models():  # output to csv files.
         df.columns = ['Document_No', 'Submission_Num', 'Probabilities', 'Entropy',
                       'Submission_Text']
 
-        csv_file_result_path = f'./turn-in/{bigram_threshold}/model_entropy/{num_topic}.csv'
-        num_topic = num_topic + 5
+        csv_file_result_path = f'./turn-in/{bigram_threshold}/model_entropy/{num_topics[index]}.csv'
+        index = index + 1
         create_file(csv_file_result_path)
         df.to_csv(csv_file_result_path, index=False)
         pbar.close()
 
 
-# calculate_entropy_mallet_models()
+calculate_entropy_mallet_models()
 
 
 """ Get docs which has entropy smaller than <threshold> """
@@ -287,24 +286,28 @@ def calculate_mean_std_deviation2(raw_dataset_csv_path, corpus_path, dictionary_
 
 
 """ Get Dataset (After remove dups and empty comments) """
-# raw_dataset_path = './data/all-comments.csv'
-# df = pandas.read_csv(raw_dataset_path, encoding="ISO-8859-1", header=0)
-#
-# pandas.set_option('max_colwidth', 1000)
-# submission_texts_df = df.Submission_Text
-# submission_numbers_df = df.Submission_Number
-#
-# cv = CountVectorizer(stop_words=stopwords.words('english'))  # Remove some basic stop words
-# combined_data = get_combined_data(submission_numbers_df, submission_texts_df)
-# data_df = pandas.DataFrame.from_dict(combined_data).transpose()
-# data_df.columns = ['Submission_Text']
-# data_df.drop_duplicates(subset='Submission_Text', keep='first', inplace=True)  # Remove duplicated comments
-# data_df = data_df.sort_index()
-# submission_nums = []
-# for sub_num in data_df.axes[0]:
-#     submission_nums.append(sub_num)
-# data_df['Submission_Num'] = submission_nums
-#
-# csv_file_result_path = './dataset.csv'
-# create_file(csv_file_result_path)
-# data_df.to_csv(csv_file_result_path)
+def change_data_set_format():
+    raw_dataset_path = './data/all-comments.csv'
+    df = pandas.read_csv(raw_dataset_path, encoding="ISO-8859-1", header=0)
+
+    pandas.set_option('max_colwidth', 1000)
+    submission_texts_df = df.Submission_Text
+    submission_numbers_df = df.Submission_Number
+
+    cv = CountVectorizer(stop_words=stopwords.words('english'))  # Remove some basic stop words
+    combined_data = get_combined_data(submission_numbers_df, submission_texts_df)
+    data_df = pandas.DataFrame.from_dict(combined_data).transpose()
+    data_df.columns = ['Submission_Text']
+    data_df.drop_duplicates(subset='Submission_Text', keep='first', inplace=True)  # Remove duplicated comments
+    data_df = data_df.sort_index()
+    submission_nums = []
+    for sub_num in data_df.axes[0]:
+        submission_nums.append(sub_num)
+    data_df['Submission_Num'] = submission_nums
+
+    csv_file_result_path = './dataset.csv'
+    create_file(csv_file_result_path)
+    data_df.to_csv(csv_file_result_path)
+
+
+# change_data_set_format()
