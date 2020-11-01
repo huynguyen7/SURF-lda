@@ -18,7 +18,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from pandas import read_csv
 from pyLDAvis import gensim
 from gensim.models import LdaModel
-from paths import create_file
+from paths import create_file, get_paths_without_reset
 
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -26,9 +26,9 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 """ Only to to load models path """
 corpus_path = './output/corpus/all-corpus.pkl'
 dataset_csv_path = './turn-in/dataset/dataset.csv'
-bigram_threshold = 100  # CHANGE THIS VALUE
+bigram_threshold = 25  # CHANGE THIS VALUE
 iteration = 200  # CHANGE THIS VALUE
-num_topics = [20, 25, 30]  # CHANGE THIS VALUE
+num_topics = [20, 25, 30, 35]  # CHANGE THIS VALUE
 models_path = list()
 for num_topic in num_topics:
     models_path.append(f'./turn-in/{bigram_threshold}/lda_models/{num_topic}-{iteration}.gensim')
@@ -56,9 +56,6 @@ def coherence_scores_to_csv(models_path, num_topics):
         index = index + 1
     df.columns = ['Num_Topics', 'Coherence_Score']
     df.to_csv(output_path, index=False)
-
-
-coherence_scores_to_csv(models_path=models_path, num_topics=num_topics)
 
 
 """ Calculate entropy for lda model """
@@ -94,9 +91,6 @@ def calculate_entropy(bigram_threshold):  # output to csv files.
         pbar.close()
 
 
-# calculate_entropy(bigram_threshold=bigram_threshold)
-
-
 def calculate_entropy_mallet_models():  # output to csv files.
     with open(corpus_path, 'rb') as f:
         corpus = pickle.load(f)
@@ -129,9 +123,6 @@ def calculate_entropy_mallet_models():  # output to csv files.
         create_file(csv_file_result_path)
         df.to_csv(csv_file_result_path, index=False)
         pbar.close()
-
-
-calculate_entropy_mallet_models()
 
 
 """ Get docs which has entropy smaller than <threshold> """
@@ -169,10 +160,6 @@ def show_docs_has_entropy_threshold(threshold, num_topics):
         index = index + 1
         pbar.update(1)
     pbar.close()
-    alarm(repeat=2)
-
-
-show_docs_has_entropy_threshold(threshold=0.2, num_topics=num_topics)
 
 
 """ Generate html files """
@@ -247,11 +234,10 @@ def calculate_mean_std_deviation(raw_dataset_csv_path, corpus_path, dictionary_p
 #                 output_path='./cal_mean_stdDeviation.txt')
 
 
-def calculate_mean_std_deviation2(raw_dataset_csv_path, corpus_path, dictionary_path, output_path):
+def calculate_mean_std_deviation2(raw_dataset_csv_path, corpus_path, dictionary_path, output_path): # output to csv files.
     with open(corpus_path, 'rb') as f:
         corpus = pickle.load(f)  # Bag of words
-    dictionary = Dictionary.load(dictionary_path)
-
+    # dictionary = Dictionary.load(dictionary_path)
     raw_dataset = pandas.read_csv(raw_dataset_csv_path)
 
     raw_word_counts_list = list()
@@ -274,9 +260,19 @@ def calculate_mean_std_deviation2(raw_dataset_csv_path, corpus_path, dictionary_
 
     if not os.path.exists(output_path):
         create_file(output_path)
-    rs_text = f'mean = {mean}\tstd_deviation = {std_deviation}' \
-              # f'raw_mean = {raw_mean}\traw_stdDeviation = {raw_std_deviation}'
-    append_row_to_text_file(string=rs_text, path=output_path)  # Output to txt file
+        df = pd.DataFrame()
+        df = df.append(pd.Series(
+            [bigram_threshold, mean, std_deviation]), ignore_index=True)
+        df.columns = ['Bigram_Threshold', 'Mean', 'Standard_Deviation']
+    else:
+        df = pandas.read_csv(output_path, header=0)
+        df = df.append({'Bigram_Threshold': bigram_threshold,
+                        'Mean': mean,
+                        'Standard_Deviation': std_deviation}, ignore_index=True)
+    df.to_csv(output_path, index=False)
+
+    # rs_text = f'mean = {mean}\tstd_deviation = {std_deviation}'
+    # append_row_to_text_file(string=rs_text, path=output_path)  # Output to txt file
 
 
 # calculate_mean_std_deviation2(raw_dataset_csv_path='./turn-in/dataset/dataset.csv',
@@ -288,7 +284,7 @@ def calculate_mean_std_deviation2(raw_dataset_csv_path, corpus_path, dictionary_
 """ Get Dataset (After remove dups and empty comments) """
 def change_data_set_format():
     raw_dataset_path = './data/all-comments.csv'
-    df = pandas.read_csv(raw_dataset_path, encoding="ISO-8859-1", header=0)
+    df = pandas.read_csv(raw_dataset_path, header=0, encoding="ISO-8859-1")
 
     pandas.set_option('max_colwidth', 1000)
     submission_texts_df = df.Submission_Text
@@ -311,3 +307,66 @@ def change_data_set_format():
 
 
 # change_data_set_format()
+
+
+def generate_bigram_list():  # output to csv files.
+    dictionary = Dictionary.load(get_paths_without_reset('all')[9])
+    temp = dictionary[0]  # This is only to "load" the dictionary.
+    id2word = dictionary.id2token
+    df = pd.DataFrame()
+    pbar = tqdm.tqdm(total=len(dictionary.cfs))
+
+    for id, count in dictionary.cfs.items():
+        if '_' in id2word[id]:
+            df = df.append(pd.Series(
+                [id2word[id], count]), ignore_index=True)
+        pbar.update(1)
+
+    output_path = f'./turn-in/{bigram_threshold}/bigram-list.csv'
+    create_file(output_path)
+    df.columns = ['Bigram', 'Count']
+    df.sort_values(by=['Count', 'Bigram'], ascending=False, inplace=True)  # Sort columns in descending order
+    df.to_csv(output_path, index=False)
+    pbar.close()
+
+
+def generate_topic_words():  # output to csv files.
+    pbar = tqdm.tqdm(total=len(models_path))
+    i = 0
+    for model_path in models_path:
+        df = pd.DataFrame()
+        lda_model = LdaMallet.load(model_path)
+        lda_model = models.wrappers.ldamallet.malletmodel2ldamodel(lda_model, iterations=iteration)
+        topics_dictionary = lda_model.show_topics(num_topics=num_topics[i], num_words=30, formatted=False)
+
+        for topic in topics_dictionary:
+            topic_num = topic[0] + 1
+            terms_string = ''
+            for term in topic[1]:
+                terms_string += term[0] + ', '
+            df = df.append(pd.Series(
+                [topic_num, terms_string[:-2]]), ignore_index=True)
+
+        output_path = f'./turn-in/{bigram_threshold}/topic_terms/{num_topics[i]}.csv'
+        create_file(output_path)
+        df.columns = ['Topic', 'Terms']
+        df.sort_values(by=['Topic'], ascending=True, inplace=True)  # Sort columns in ascending order
+        df.to_csv(output_path, index=False)
+        pbar.update(1)
+        i = i + 1
+    pbar.close()
+
+
+""" Produce to evaluate """
+coherence_scores_to_csv(models_path=models_path, num_topics=num_topics)
+calculate_entropy_mallet_models()
+show_docs_has_entropy_threshold(threshold=0.2, num_topics=num_topics)
+generate_bigram_list()
+generate_topic_words()
+
+calculate_mean_std_deviation2(raw_dataset_csv_path='./turn-in/dataset/dataset.csv',
+                corpus_path='./output/corpus/all-corpus.pkl',
+                dictionary_path='./output/dictionary/all.gensim',
+                output_path='./turn-in/Mean-StdDeviation.csv')
+
+alarm(repeat=2)
