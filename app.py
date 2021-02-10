@@ -181,10 +181,6 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 # clean_data_second_phase(get_paths_second_phase('all'))
 clean_data_third_phase(get_paths_third_phase('all'), bigram_threshold=25, no_below=20, no_above=0.5)
 
-# clean_data_first_phase(get_paths_first_phase('test'))
-# clean_data_second_phase(get_paths_second_phase('test'))
-# clean_data_third_phase(get_paths_third_phase('test'), bigram_threshold=1, no_below=1, no_above=1)
-
 
 """ Evaluate LDA models"""
 # evaluate_with_coherence_score(get_paths_without_reset('all'),
@@ -225,5 +221,5 @@ iterations = 200
 # LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=20, iterations=iterations, minimum_probability=minimum_probability)
 # LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=25, iterations=iterations, minimum_probability=minimum_probability)
 # LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=30, iterations=iterations, minimum_probability=minimum_probability)
-LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=35, iterations=iterations, minimum_probability=minimum_probability)
+#LDA_with_mallet(get_paths_without_reset('all'), './output/final_results/all/', num_topics=35, iterations=iterations, minimum_probability=minimum_probability)
 alarm(repeat=5)

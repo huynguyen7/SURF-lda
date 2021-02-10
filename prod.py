@@ -7,9 +7,11 @@ import math
 import pandas
 import pickle
 import warnings
+import matplotlib.pyplot as plt
 
+from matplotlib.ticker import FuncFormatter
 from gensim.models.wrappers import LdaMallet
-
+from visualizing_utils import dominant_topics, topics_proportion
 from main_utils import alarm, append_row_to_text_file, get_combined_data
 from gensim import models
 from gensim.corpora import Dictionary
@@ -28,7 +30,7 @@ corpus_path = './output/corpus/all-corpus.pkl'
 dataset_csv_path = './turn-in/dataset/dataset.csv'
 bigram_threshold = 25  # CHANGE THIS VALUE
 iteration = 200  # CHANGE THIS VALUE
-num_topics = [20, 25, 30, 35]  # CHANGE THIS VALUE
+num_topics = [30]  # CHANGE THIS VALUE
 models_path = list()
 for num_topic in num_topics:
     models_path.append(f'./turn-in/{bigram_threshold}/lda_models/{num_topic}-{iteration}.gensim')
@@ -357,16 +359,82 @@ def generate_topic_words():  # output to csv files.
     pbar.close()
 
 
-""" Produce to evaluate """
-coherence_scores_to_csv(models_path=models_path, num_topics=num_topics)
-calculate_entropy_mallet_models()
-show_docs_has_entropy_threshold(threshold=0.2, num_topics=num_topics)
-generate_bigram_list()
-generate_topic_words()
+def generate_topic_weight_terms():
+    with open(corpus_path, 'rb') as f:
+        corpus = pickle.load(f)
 
-calculate_mean_std_deviation2(raw_dataset_csv_path='./turn-in/dataset/dataset.csv',
-                corpus_path='./output/corpus/all-corpus.pkl',
-                dictionary_path='./output/dictionary/all.gensim',
-                output_path='./turn-in/Mean-StdDeviation.csv')
+    pbar = tqdm.tqdm(total=len(models_path))
+    i = 0
+    for model_path in models_path:
+        lda_model = LdaMallet.load(model_path)
+        lda_model = models.wrappers.ldamallet.malletmodel2ldamodel(lda_model, iterations=iteration)
+        df = topics_proportion(lda_model=lda_model, corpus=corpus, num_topics=num_topics[i])
+        df.sort_values(by=['Topic'], ascending=True, inplace=True)  # Sort columns in ascending order
+
+        output_path = f'./turn-in/{bigram_threshold}/topic_proportion_terms/{num_topics[i]}.csv'
+        create_file(output_path)
+        df.to_csv(output_path, index=False)
+        pbar.update(1)
+        i = i + 1
+    pbar.close()
+
+
+def generate_topic_proportion_terms():  # This calculation is based on dominant topic belonged to each doc.
+    with open(corpus_path, 'rb') as f:
+        corpus = pickle.load(f)
+
+    pbar = tqdm.tqdm(total=len(models_path))
+    i = 0
+    for model_path in models_path:
+        lda_model = LdaMallet.load(model_path)
+        lda_model = models.wrappers.ldamallet.malletmodel2ldamodel(lda_model, iterations=iteration)
+
+        df_dominant_topic_document = dominant_topics(lda_model=lda_model, corpus=corpus)
+        # Number of Documents for Each Topic
+        topic_counts = df_dominant_topic_document['Dominant_Topic'].value_counts()
+
+        # Percentage of Documents for Each Topic
+        topic_contribution = round(topic_counts / topic_counts.sum(), 4)
+
+        # Topic Nums
+        topic_nums = pd.Series(topic_contribution.index, topic_contribution.index)
+
+        topic_terms = pd.Series()
+        # Topic Terms
+        topics_dictionary = lda_model.show_topics(num_topics=num_topics[i], num_words=30, formatted=False)
+        for topic in topics_dictionary:
+            topic_num = topic[0] + 1
+            terms_string = ''
+            for term in topic[1]:
+                terms_string += term[0] + ', '
+            topic_terms = topic_terms.append(pd.Series(terms_string[:-2], index=[topic_num * 1.0]))
+
+        # Concatenate Column wise
+        df_dominant_topics = pd.concat([topic_nums, topic_counts, topic_contribution, topic_terms], axis=1)
+
+        # Change Column names
+        df_dominant_topics.columns = ['Topic', 'Count_Documents', 'Proportion_Over_Documents', 'Terms']
+        df_dominant_topics.sort_values(by=['Topic'], ascending=True, inplace=True)  # Sort columns in ascending order
+
+        output_path = f'./turn-in/{bigram_threshold}/topic_proportion_terms/{num_topics[i]}.csv'
+        create_file(output_path)
+        df_dominant_topics.to_csv(output_path, index=False)
+        pbar.update(1)
+        i = i + 1
+    pbar.close()
+
+
+""" Produce to evaluate """
+# coherence_scores_to_csv(models_path=models_path, num_topics=num_topics)
+# generate_pyLDAvis_with_models(models_path=models_path, num_topics=num_topics)
+# calculate_entropy_mallet_models()
+# show_docs_has_entropy_threshold(threshold=0.2, num_topics=num_topics)
+# generate_bigram_list()
+# generate_topic_weight_terms()
+
+# calculate_mean_std_deviation2(raw_dataset_csv_path='./turn-in/dataset/dataset.csv',
+#                 corpus_path='./output/corpus/all-corpus.pkl',
+#                 dictionary_path='./output/dictionary/all.gensim',
+#                 output_path='./turn-in/Mean-StdDeviation.csv')
 
 alarm(repeat=2)

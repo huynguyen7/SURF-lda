@@ -1,9 +1,11 @@
 import pickle
 import matplotlib.pyplot as plt
 import pyLDAvis
+import pandas as pd
 from gensim import models
 from gensim.corpora import Dictionary
 from gensim.models import CoherenceModel
+from gensim.models.wrappers import LdaMallet
 from nltk import word_tokenize
 from nltk.probability import FreqDist
 from nltk.collocations import BigramCollocationFinder
@@ -196,3 +198,45 @@ def graphs_convergence_perplexity_coherence(all_metrics, num_topics, iterations,
         else:
             save_path = f"./evaluations/graph_scores/{num_topics}_topics_{iterations[-1]}_iterations_{passes}_passes/graphs/Docs_Converged.png"
         fig.savefig(save_path)
+
+
+def dominant_topics(lda_model, corpus):  # dominant topic for each document
+    df = pd.DataFrame()
+
+    for i, row_list in enumerate(lda_model[corpus]):
+        row = row_list[0] if lda_model.per_word_topics else row_list
+        row = sorted(row, key=lambda x: (x[1]), reverse=True)
+        for j, (topic_num, prop_topic) in enumerate(row):
+            if j == 0:  # => dominant topic
+                wp = lda_model.show_topic(topic_num)
+                topic_keywords = ", ".join([word for word, prop in wp])
+                df = df.append(
+                    pd.Series([int(topic_num) + 1, round(prop_topic, 4), topic_keywords]), ignore_index=True)
+            else:
+                break
+    df.columns = ['Dominant_Topic', 'Perc_Contribution', 'Topic_Keywords']
+    return df
+
+
+def topics_proportion(lda_model, corpus, num_topics):
+    df = pd.DataFrame()
+    topics_weight = [0] * num_topics
+    num_docs_contributed = [0] * num_topics
+
+    for i, row_list in enumerate(lda_model[corpus]):
+        row = row_list[0] if lda_model.per_word_topics else row_list
+        row = sorted(row, key=lambda x: (x[1]), reverse=True)
+        for j, (topic_num, prop_topic_in_doc) in enumerate(row):
+            topics_weight[topic_num] += prop_topic_in_doc
+            num_docs_contributed[topic_num] += 1
+
+    for topic_num in range(num_topics):
+        wp = lda_model.show_topic(topic_num)
+        topic_keywords = ", ".join([word for word, prop in wp])
+        weight_topic = topics_weight[topic_num]
+        df = df.append(
+            pd.Series([int(topic_num) + 1, int(num_docs_contributed[topic_num]), weight_topic, topic_keywords]), ignore_index=True)
+
+    df.columns = ['Topic', 'Num_Documents_Contributed', 'Weight_Contribution', 'Terms']
+    return df
+
